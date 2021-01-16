@@ -6,6 +6,7 @@ import { SalidaArticulo } from '../../../models/almacenDeMateriaPrimaYHerramient
 import { ImpresionService } from '../../../services/impresion.service'
 import { ReportesPersonalizadosAlmacenProduccionService } from '../../../services/reportes-personalizados-almacen-produccion.service'
 import { ReportePersonalizadoAlmacenProduccion } from '../../../models/reportePersonalizadoAlmacenProduccion/reportePersonalizadoAlmacenProduccion.model'
+import { ExcelService } from '../../../services/excel.service'
 
 @Component({
   selector: 'app-r-personalizado-almacen-produccion',
@@ -25,7 +26,8 @@ export class RPersonalizadoAlmacenProduccionComponent implements OnInit {
     private reportesService: ReportesProduccionService,
     private router: Router,
     private impresionService: ImpresionService,
-    private repoPersoService: ReportesPersonalizadosAlmacenProduccionService
+    private repoPersoService: ReportesPersonalizadosAlmacenProduccionService,
+    private excelService: ExcelService
   ) {}
   ngOnInit() {
     this.cargarReporte()
@@ -55,6 +57,11 @@ export class RPersonalizadoAlmacenProduccionComponent implements OnInit {
         )
     })
   }
+
+  exportarAExcel() {
+    this.excelService.exportAsExcelFile(this.reporte.articulos, "ReportePersonalizado")
+  }
+
 
   imprimir(articulos: Articulo[]) {
     this.impresionService
