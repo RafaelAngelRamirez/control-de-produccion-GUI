@@ -188,6 +188,7 @@ export class ScannerFormularioDinamicoComponent implements OnInit {
   }
 
   submit(datos: FormGroup) {
+    if(this.cargando['registrando']) return
     this.cargando['registrando'] = 'Registrando datos de proceso.'
     this.folioService
       .registrar(this.ordenEscaneada, this.idDepartamento, datos.value)
