@@ -4,7 +4,7 @@
   "description": "GUI Descktop CARRDUCIsys",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve -o --ssl true --ssl-key /home/sistemas/Desktop/CarrduciSys/cert/desarrollo.key --ssl-cert /home/sistemas/Desktop/CarrduciSys/cert/desarrollo.crt --host 0.0.0.0 --aot",
+    "start": "ng serve -o --ssl true --ssl-key /home/sistemas/Desktop/CarrduciSys/cert/desarrollo.key --ssl-cert /home/sistemas/Desktop/CarrduciSys/cert/desarrollo.crt --host 0.0.0.0",
     "build": "ng build --prod --verbose",
     "test": "ng test",
     "lint": "ng lint",
