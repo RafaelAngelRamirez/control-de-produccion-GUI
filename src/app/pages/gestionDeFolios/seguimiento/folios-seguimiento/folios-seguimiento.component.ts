@@ -13,6 +13,7 @@ import { ManejoDeMensajesService } from '../../../../services/utilidades/manejo-
 import { ReportesProduccionService } from '../../../../services/reportes/reportes-produccion.service'
 import { ExcelService } from '../../../../services/excel.service'
 import { DatePipe } from '@angular/common'
+import { RouterState } from '@angular/router'
 // import { FolioService } from 'src/app/services/folio/folio.service'
 // import { 
 //   OrdenesPorDepartamentoEnProcesosComponent
@@ -254,7 +255,7 @@ export class FoliosSeguimientoComponent implements OnInit {
   }
 
 
-  exportarAExcel() {
+  crearReporteOrdenesEnProceso() {
 
     // let paginacion: Paginacion = new Paginacion(5000, 0, 1, 'nombre')
 
@@ -279,7 +280,6 @@ export class FoliosSeguimientoComponent implements OnInit {
         .findAllOrdenesPorDeparatmento(departamento._id) 
         //Vamos a convertir a una promesa. En este momento es obseravable
         .toPromise()
-        
         )
         //Tenemos un arreglo de promesas pendientes de realizarse. 
         // Las voy a asignar a un arreglo
@@ -310,53 +310,48 @@ export class FoliosSeguimientoComponent implements OnInit {
             //Este es previus inicializado
             [])
 
-
           //Terminado el reduce ya exportamos a excel
           this.excelService.exportAsExcelFile(
             ordenesParaVaciarEnExcel.map(x=>{
-
-
-              let depaCorr
-              departamentos.map(
-                departamento => {
-                  if(departamento._id === x.ubicacionActual.idDepartamento)
-                    depaCorr = departamento.nombre
+            
+              let totalRuta = 0
+              x.ruta.map(
+                _ => {
+                  totalRuta = totalRuta +1
                 }
               )
 
               let recepcionCorr = x.ubicacionActual.recepcion
               let entradaCorr = x.ubicacionActual.entrada
               let salidaCorr = x.ubicacionActual.salida
-              
 
-              console.log(depaCorr, recepcionCorr, entradaCorr, salidaCorr)
-              // x.ubicacionActual = x.ubicacionActual.departamento.nombre
+              x.totalRuta = totalRuta
+              x.recepcion = recepcionCorr
+              x.entrada = entradaCorr
+              x.salida = salidaCorr
+
+              delete x.idSKU
+              delete x.folio
+              delete x.pedido
+              delete x.orden
+              delete x.idProcesoActual
+              delete x.ruta
+              delete x.recibida
+              delete x.consecutivoOrden
+              delete x.observacionesPedido
+              delete x.ubicacionActual
+              delete x.laserAlmacen
 
               return x
             }),
             'ORDENES_EN_PROCESO'
           )
-
           //Todo esto es   asincrono
-
-          console.log("Termino la operacion asincrona")
-
 
         })
         //Por si hay algún problema
         .catch(error=> console.log("Error", error))
-
-
-
-
-
-
     })
-
-
-    console.log("Esto no es asincrono")
-    
-    
   }
 
 }
