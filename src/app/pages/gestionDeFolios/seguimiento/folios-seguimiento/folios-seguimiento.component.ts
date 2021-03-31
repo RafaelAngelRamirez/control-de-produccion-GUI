@@ -13,6 +13,10 @@ import { ManejoDeMensajesService } from '../../../../services/utilidades/manejo-
 import { ReportesProduccionService } from '../../../../services/reportes/reportes-produccion.service'
 import { ExcelService } from '../../../../services/excel.service'
 import { DatePipe } from '@angular/common'
+// import { FolioService } from 'src/app/services/folio/folio.service'
+// import { 
+//   OrdenesPorDepartamentoEnProcesosComponent
+// } from 'src/app/components/ordenes-por-departamento-en-procesos/ordenes-por-departamento-en-procesos.component'
 
 @Component({
   selector: 'app-folios-seguimiento',
@@ -36,7 +40,8 @@ export class FoliosSeguimientoComponent implements OnInit {
     private msjService: ManejoDeMensajesService,
     private reporteService: ReportesProduccionService,
     private excelService: ExcelService,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    // private ordnsPorDepa: OrdenesPorDepartamentoEnProcesosComponent
   ) {}
 
   ngOnInit() {
@@ -247,4 +252,111 @@ export class FoliosSeguimientoComponent implements OnInit {
         _ => (this.generandoReporteTiemposDeProceso = false)
       )
   }
+
+
+  exportarAExcel() {
+
+    // let paginacion: Paginacion = new Paginacion(5000, 0, 1, 'nombre')
+
+    let ordenesParaVaciarEnExcel = []
+
+    //Esto te puede generar un error tambien
+    //let deps = this.departamentoService
+    //deps.findAllPool()
+    
+    //Debemos asegurarnos que el usuario tiene todos los departamentos
+    // cargados. Aunque hice un "pool" de departamentos, es mejor volver
+    //a cargar todo
+    
+
+    this.departamentoService.findAll(new Paginacion(30, 0, 1, "nombre"))
+      .subscribe(departamentos=>{
+
+      //Ya con todos los departmentos, ahora obtenemos las operaciones
+
+      const arregloDePromesas = departamentos
+      .map(departamento=> this.folioService
+        .findAllOrdenesPorDeparatmento(departamento._id) 
+        //Vamos a convertir a una promesa. En este momento es obseravable
+        .toPromise()
+        
+        )
+        //Tenemos un arreglo de promesas pendientes de realizarse. 
+        // Las voy a asignar a un arreglo
+
+
+        // Para sincronizar todas las operaciones vamos a usar esta funcion
+        //Esta operacion ejecuta todas las promesas, si una sola falla,
+        //manda todo como un error. 
+        Promise.all(arregloDePromesas)
+        //Ahora ejectuamos. 
+        .then(arregloDeRespuestas=>{
+
+          //Cada promesa retorno un arreglo, [ [ordenes, ...], [ordenes, ...] ]
+          // Las convierto
+          ordenesParaVaciarEnExcel = arregloDeRespuestas
+          //Vamos a transformar todo en un solo arreglo
+          .reduce(
+            
+            ////previus es el valor que ya traimos []
+            //Current es el valor actual del arregloDeRespuestas
+            (previus, current)=>{
+              //los ... se llaman spreed operator. Copia un arreglo
+              // esto hace que quede [orden, ...]
+              previus.push(...current)
+              //Siempre se retorna previus(acumulador)
+              return previus
+            },
+            //Este es previus inicializado
+            [])
+
+
+          //Terminado el reduce ya exportamos a excel
+          this.excelService.exportAsExcelFile(
+            ordenesParaVaciarEnExcel.map(x=>{
+
+
+              let depaCorr
+              departamentos.map(
+                departamento => {
+                  if(departamento._id === x.ubicacionActual.idDepartamento)
+                    depaCorr = departamento.nombre
+                }
+              )
+
+              let recepcionCorr = x.ubicacionActual.recepcion
+              let entradaCorr = x.ubicacionActual.entrada
+              let salidaCorr = x.ubicacionActual.salida
+              
+
+              console.log(depaCorr, recepcionCorr, entradaCorr, salidaCorr)
+              // x.ubicacionActual = x.ubicacionActual.departamento.nombre
+
+              return x
+            }),
+            'ORDENES_EN_PROCESO'
+          )
+
+          //Todo esto es   asincrono
+
+          console.log("Termino la operacion asincrona")
+
+
+        })
+        //Por si hay algún problema
+        .catch(error=> console.log("Error", error))
+
+
+
+
+
+
+    })
+
+
+    console.log("Esto no es asincrono")
+    
+    
+  }
+
 }

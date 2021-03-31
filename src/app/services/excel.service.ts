@@ -26,6 +26,42 @@ export class ExcelService {
     })
     this.saveAsExcelFile(excelBuffer, excelFileName)
   }
+
+  public expoortAsExcelWithVariousSheets(jsonsArray: any[], sheetsNames: any[], excelFileName: string): void {
+    
+    let workSheetsArray: any[] = []
+
+    jsonsArray.map(
+      json => {
+        let worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(json)
+        workSheetsArray.push(worksheet)
+      }
+    )
+
+    let workbook: XLSX.WorkBook = {
+      Sheets: {},
+      SheetNames: []
+    }
+
+    let SheetName = ''
+    let CurrentName = 0
+
+    workSheetsArray.map(
+      sigleWorkSheet => {
+        SheetName = sheetsNames[CurrentName]
+        workbook.Sheets[`${SheetName}`] = sigleWorkSheet
+        workbook.SheetNames.push(SheetName)
+        CurrentName = CurrentName + 1
+      }
+    )
+
+    const excelBuffer: any = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array'
+    })
+    this.saveAsExcelFile(excelBuffer, excelFileName)
+  }
+
   private saveAsExcelFile(buffer: any, fileName: string): void {
     const data: Blob = new Blob([buffer], { type: EXCEL_TYPE })
     FileSaver.saveAs(
@@ -33,4 +69,6 @@ export class ExcelService {
       fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION
     )
   }
+
+
 }
