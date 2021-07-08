@@ -41,7 +41,7 @@ export class ModeloCompleto
     public porcentajeDeMerma?: number,
     // Este es solo para modificaciones de las órdenes.
     public mediasGeneradas: boolean = false, // Para ordenamiento
-    public parte: "A" | "B" | "C" | "DES " | "ESP" = "C"
+    public parte: "A" | "B" | "C" | "N" | "DES " | "ESP" = "C"
   ) {}
 
   deserialize(input: this): this {
